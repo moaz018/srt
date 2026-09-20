@@ -1,12 +1,20 @@
 import { useState, useEffect } from 'react';
 import { MessageCircle, X, Send, Sparkles, PhoneCall } from 'lucide-react';
-
-const WHATSAPP_NUMBER = '923236602316';
-const DISPLAY_PHONE = '03236602316';
+import { getSiteConfig } from '../data/siteConfig';
 
 export default function WhatsAppButton() {
   const [isOpen, setIsOpen] = useState(false);
   const [hasPrompted, setHasPrompted] = useState(false);
+  const [siteConfig, setSiteConfig] = useState(getSiteConfig());
+
+  useEffect(() => {
+    const handleConfigChange = () => setSiteConfig(getSiteConfig());
+    window.addEventListener('srt_config_updated', handleConfigChange);
+    return () => window.removeEventListener('srt_config_updated', handleConfigChange);
+  }, []);
+
+  const whatsappNumber = siteConfig.whatsappNumber || '923236602316';
+  const displayPhone = siteConfig.whatsappDisplay || '03236602316';
 
   // Show auto tooltip prompt once after 3.5 seconds
   useEffect(() => {
@@ -19,7 +27,7 @@ export default function WhatsAppButton() {
   const openWhatsApp = (customMessage?: string) => {
     const message = customMessage || 'Hello SRT Sublimation, I would like to inquire about printing services, rates, and roll-to-roll fabric printing.';
     const encoded = encodeURIComponent(message);
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encoded}`, '_blank', 'noopener,noreferrer');
+    window.open(`https://wa.me/${whatsappNumber}?text=${encoded}`, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -89,11 +97,11 @@ export default function WhatsAppButton() {
             <div className="pt-2 border-t border-border flex items-center justify-between text-[11px] text-muted-foreground">
               <span>Direct WhatsApp:</span>
               <a
-                href={`tel:${DISPLAY_PHONE}`}
+                href={`tel:${displayPhone}`}
                 className="font-bold text-primary hover:underline flex items-center gap-1"
               >
                 <PhoneCall className="w-3 h-3" />
-                <span>{DISPLAY_PHONE}</span>
+                <span>{displayPhone}</span>
               </a>
             </div>
           </div>
@@ -130,8 +138,8 @@ export default function WhatsAppButton() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="pointer-events-auto relative group flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white shadow-2xl shadow-emerald-900/50 transition-all duration-300 hover:scale-110 active:scale-95 focus:outline-none focus:ring-4 focus:ring-[#25D366]/40"
-        aria-label="Open WhatsApp conversation with SRT Sublimation (03236602316)"
-        title={`WhatsApp: ${DISPLAY_PHONE}`}
+        aria-label={`Open WhatsApp conversation with SRT Sublimation (${displayPhone})`}
+        title={`WhatsApp: ${displayPhone}`}
       >
         {/* Animated Ripple Waves */}
         <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-30 pointer-events-none" />

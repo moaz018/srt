@@ -13,38 +13,52 @@ import {
   Tag,
   Grid
 } from 'lucide-react';
-import { CATALOG_DESIGNS, CATALOG_PDF_URL, CatalogDesign } from '../data/catalog';
+import { CATALOG_PDF_URL, CatalogDesign, getCatalogDesigns } from '../data/catalog';
+import { getSiteConfig } from '../data/siteConfig';
 import AnimatedSection from '../components/AnimatedSection';
 
-const WHATSAPP_PHONE = '923236602316';
-
 export default function Catalog() {
+  const [designs, setDesigns] = useState<CatalogDesign[]>(() => getCatalogDesigns());
+  const [siteConfig, setSiteConfig] = useState(() => getSiteConfig());
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedDesign, setSelectedDesign] = useState<CatalogDesign | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  useEffect(() => {
+    const handleUpdate = () => {
+      setDesigns(getCatalogDesigns());
+      setSiteConfig(getSiteConfig());
+    };
+    window.addEventListener('srt_catalog_updated', handleUpdate);
+    window.addEventListener('srt_config_updated', handleUpdate);
+    return () => {
+      window.removeEventListener('srt_catalog_updated', handleUpdate);
+      window.removeEventListener('srt_config_updated', handleUpdate);
+    };
+  }, []);
+
+  const dynamicCollections = Array.from(new Set(designs.map(d => d.collection).filter(Boolean)));
   const categories = [
-    { id: 'all', label: 'All Collections (9 Designs)' },
-    { id: '3D Sculpted Baroque & Gold Relief', label: '3D Baroque & Gold Relief' },
-    { id: '3D Romantic & Velvet', label: 'Romantic & Velvet Textures' },
-    { id: '3D Jewel & Crystal', label: 'Jewel & Crystal Botanicals' },
-    { id: '3D Kids & Whimsical', label: 'Kids & Whimsical Bedding' },
+    { id: 'all', label: `All Collections (${designs.length} Designs)` },
+    ...dynamicCollections.map(col => ({ id: col, label: col }))
   ];
 
   const filteredDesigns =
     selectedCategory === 'all'
-      ? CATALOG_DESIGNS
-      : CATALOG_DESIGNS.filter(d => d.collection === selectedCategory);
+      ? designs
+      : designs.filter(d => d.collection === selectedCategory);
+
+  const whatsappPhone = siteConfig.whatsappNumber || '923236602316';
 
   const handleWhatsAppInquiry = (design: CatalogDesign) => {
     const text = `Hello Sabiha Ramzan Textile (SRT)!\n\nI would like to inquire about production & rates for:\n• Design Code: *${design.id}*\n• Title: ${design.title}\n• Collection: ${design.collection}\n• Repeat Size: ${design.size}\n• Recommended Substrate: ${design.fabric}\n\nPlease share price per meter/yard, sample swatch, and MOQ.`;
-    const url = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(text)}`;
+    const url = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handleGeneralWhatsApp = () => {
     const text = `Hello Sabiha Ramzan Textile (SRT)!\n\nI reviewed your 3D Royal Collection Sample Book (PDF Catalogue) on your website. I would like to inquire about custom fabric sampling and bulk sublimation printing.`;
-    const url = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(text)}`;
+    const url = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
@@ -318,7 +332,7 @@ export default function Catalog() {
                   <div className="absolute -inset-1 bg-gradient-to-r from-primary to-amber-500 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-500" />
                   <div className="relative rounded-2xl overflow-hidden border border-border bg-neutral-900 shadow-2xl">
                     <img
-                      src={CATALOG_DESIGNS[0].image}
+                      src={designs[0]?.image || `${import.meta.env.BASE_URL}catalog/design-srt-3dr-001.jpg`}
                       alt="3D Royal Collection Sample Book Cover Preview"
                       className="w-full h-auto aspect-4/3 object-cover transform group-hover:scale-105 transition-transform duration-500"
                     />

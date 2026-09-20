@@ -1,10 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Phone, Mail, MapPin, Clock, MessageCircle, CheckCircle2, Send } from 'lucide-react';
 import AnimatedSection from '../components/AnimatedSection';
+import { getSiteConfig } from '../data/siteConfig';
 
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
+  const [siteConfig, setSiteConfig] = useState(getSiteConfig());
+
+  useEffect(() => {
+    const handleConfigChange = () => setSiteConfig(getSiteConfig());
+    window.addEventListener('srt_config_updated', handleConfigChange);
+    return () => window.removeEventListener('srt_config_updated', handleConfigChange);
+  }, []);
+
+  const whatsappPhone = siteConfig.whatsappNumber || '923236602316';
+  const whatsappDisplay = siteConfig.whatsappDisplay || '03236602316';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -127,10 +138,10 @@ export default function Contact() {
                   </h3>
                   <ul className="space-y-5">
                     {[
-                      { icon: Phone, label: '+92 323 6602316 / 03236602316' },
-                      { icon: Mail, label: 'info@srtprinting.com' },
-                      { icon: MapPin, label: 'Industrial Area, Sialkot, Punjab, Pakistan' },
-                      { icon: Clock, label: 'Mon–Sat: 8:30am – 7:30pm PKT' },
+                      { icon: Phone, label: `${siteConfig.phone || '+92 323 6602316'} / ${siteConfig.whatsappDisplay || '03236602316'}` },
+                      { icon: Mail, label: siteConfig.email || 'info@srtprinting.com' },
+                      { icon: MapPin, label: siteConfig.factoryAddress || 'Industrial Area, Sialkot, Punjab, Pakistan' },
+                      { icon: Clock, label: siteConfig.businessHours || 'Mon–Sat: 8:30am – 7:30pm PKT' },
                     ].map(({ icon: Icon, label }) => (
                       <li key={label} className="flex items-start gap-3.5 text-sm text-muted-foreground group">
                         <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
@@ -145,13 +156,13 @@ export default function Contact() {
 
               <AnimatedSection animation="slide-right" delay={150}>
                 <a
-                  href="https://wa.me/923236602316?text=Hello%20SRT%20Sublimation%2C%20I%20would%20like%20to%20inquire%20about%20printing%20services%20and%20rates."
+                  href={`https://wa.me/${whatsappPhone}?text=Hello%20SRT%20Sublimation%2C%20I%20would%20like%20to%20inquire%20about%20printing%20services%20and%20rates.`}
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center justify-center gap-3 bg-[#25D366] text-white rounded-2xl px-6 py-4 font-bold text-sm hover:bg-[#20ba59] hover:shadow-lg hover:shadow-emerald-600/30 hover:scale-[1.02] active:scale-95 transition-all shadow-md"
                 >
                   <MessageCircle className="w-5 h-5 fill-white" />
-                  <span>Chat on WhatsApp (03236602316)</span>
+                  <span>Chat on WhatsApp ({whatsappDisplay})</span>
                 </a>
               </AnimatedSection>
             </aside>

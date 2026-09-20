@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin, Clock, MessageCircle, Share2, Sparkles, Flame, Bed } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, MessageCircle, Share2, Sparkles, Flame, Bed, ShieldCheck } from 'lucide-react';
+import { getSiteConfig } from '../data/siteConfig';
 
 const serviceLinks = [
   { label: 'Sublimation Printing', slug: 'sublimation-printing' },
@@ -12,6 +14,17 @@ const serviceLinks = [
 ];
 
 export default function Footer() {
+  const [siteConfig, setSiteConfig] = useState(getSiteConfig());
+
+  useEffect(() => {
+    const handleConfigChange = () => setSiteConfig(getSiteConfig());
+    window.addEventListener('srt_config_updated', handleConfigChange);
+    return () => window.removeEventListener('srt_config_updated', handleConfigChange);
+  }, []);
+
+  const whatsappPhone = siteConfig.whatsappNumber || '923236602316';
+  const whatsappDisplay = siteConfig.whatsappDisplay || '03236602316';
+
   return (
     <footer className="bg-[var(--navy)] text-white/80 border-t border-primary/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -46,7 +59,11 @@ export default function Footer() {
             <div className="flex items-center gap-3">
               {[
                 { icon: Share2, href: '#', label: 'Facebook' },
-                { icon: MessageCircle, href: 'https://wa.me/923236602316?text=Hello%20SRT%20Sublimation%2C%20I%20would%20like%20to%20inquire%20about%20printing%20services.', label: 'WhatsApp (03236602316)' },
+                {
+                  icon: MessageCircle,
+                  href: `https://wa.me/${whatsappPhone}?text=Hello%20SRT%20Sublimation%2C%20I%20would%20like%20to%20inquire%20about%20printing%20services.`,
+                  label: `WhatsApp (${whatsappDisplay})`
+                },
               ].map(({ icon: Icon, href, label }) => (
                 <a
                   key={href + (label || '')}
@@ -80,6 +97,7 @@ export default function Footer() {
                 { label: 'Request a Quote', to: '/quote' },
                 { label: 'Contact & Location', to: '/contact' },
                 { label: 'Sublimation FAQs', to: '/faq' },
+                { label: 'Admin Portal', to: '/admin' },
               ].map(l => (
                 <li key={l.to}>
                   <Link to={l.to} className="text-sm text-white/65 hover:text-primary transition-colors flex items-center gap-1.5 group">
@@ -117,10 +135,10 @@ export default function Footer() {
             </h3>
             <ul className="space-y-3.5">
               {[
-                { icon: MapPin, text: 'Industrial Area, Sialkot, Punjab, Pakistan' },
-                { icon: Phone, text: '+92 323 6602316 / 03236602316 (Direct Desk)' },
-                { icon: Mail, text: 'info@srtprinting.com' },
-                { icon: Clock, text: 'Mon–Sat: 8:30am – 7:30pm PKT' },
+                { icon: MapPin, text: siteConfig.factoryAddress || 'Industrial Area, Sialkot, Punjab, Pakistan' },
+                { icon: Phone, text: `${siteConfig.phone || '+92 323 6602316'} / ${siteConfig.whatsappDisplay || '03236602316'} (Direct Desk)` },
+                { icon: Mail, text: siteConfig.email || 'info@srtprinting.com' },
+                { icon: Clock, text: siteConfig.businessHours || 'Mon–Sat: 8:30am – 7:30pm PKT' },
               ].map(({ icon: Icon, text }) => (
                 <li key={text} className="flex items-start gap-3 text-xs sm:text-sm text-white/70">
                   <Icon className="w-4 h-4 mt-0.5 text-primary flex-shrink-0" />

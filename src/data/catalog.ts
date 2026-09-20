@@ -1,8 +1,8 @@
 export interface CatalogDesign {
   id: string;
   title: string;
-  collection: '3D Sculpted Baroque & Gold Relief' | '3D Romantic & Velvet' | '3D Jewel & Crystal' | '3D Kids & Whimsical';
-  category: 'bedsheets' | 'apparel' | 'curtains' | 'cushions';
+  collection: string;
+  category: string;
   categoryLabel: string;
   size: string;
   fabric: string;
@@ -18,7 +18,7 @@ const base = import.meta.env.BASE_URL.endsWith('/')
 
 export const CATALOG_PDF_URL = `${base}catalog/SRT-Sample-Book-3D-Royal-Collection.pdf`;
 
-export const CATALOG_DESIGNS: CatalogDesign[] = [
+export const INITIAL_CATALOG_DESIGNS: CatalogDesign[] = [
   {
     id: 'SRT-3DR-001',
     title: 'Royal Golden Feather & White Magnolia Blossom',
@@ -137,3 +137,63 @@ export const CATALOG_DESIGNS: CatalogDesign[] = [
     featured: false,
   },
 ];
+
+export const CATALOG_DESIGNS: CatalogDesign[] = INITIAL_CATALOG_DESIGNS;
+
+const CATALOG_STORAGE_KEY = 'srt_catalog_designs';
+
+export function getCatalogDesigns(): CatalogDesign[] {
+  if (typeof window === 'undefined') return INITIAL_CATALOG_DESIGNS;
+  try {
+    const stored = localStorage.getItem(CATALOG_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load designs from localStorage', e);
+  }
+  return INITIAL_CATALOG_DESIGNS;
+}
+
+export function saveCatalogDesigns(designs: CatalogDesign[]): void {
+  try {
+    localStorage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(designs));
+    window.dispatchEvent(new Event('srt_catalog_updated'));
+  } catch (e) {
+    console.error('Failed to save designs to localStorage', e);
+  }
+}
+
+export function addCatalogDesign(design: CatalogDesign): CatalogDesign[] {
+  const current = getCatalogDesigns();
+  const updated = [design, ...current];
+  saveCatalogDesigns(updated);
+  return updated;
+}
+
+export function updateCatalogDesign(updatedDesign: CatalogDesign): CatalogDesign[] {
+  const current = getCatalogDesigns();
+  const updated = current.map(d => (d.id === updatedDesign.id ? updatedDesign : d));
+  saveCatalogDesigns(updated);
+  return updated;
+}
+
+export function deleteCatalogDesign(id: string): CatalogDesign[] {
+  const current = getCatalogDesigns();
+  const updated = current.filter(d => d.id !== id);
+  saveCatalogDesigns(updated);
+  return updated;
+}
+
+export function resetCatalogDesigns(): CatalogDesign[] {
+  try {
+    localStorage.removeItem(CATALOG_STORAGE_KEY);
+    window.dispatchEvent(new Event('srt_catalog_updated'));
+  } catch (e) {
+    console.error('Failed to reset catalog designs', e);
+  }
+  return INITIAL_CATALOG_DESIGNS;
+}

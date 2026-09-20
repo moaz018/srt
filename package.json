@@ -11,6 +11,7 @@
     "format": "oxfmt"
   },
   "dependencies": {
+    "firebase": "^12.19.0",
     "lucide-react": "^1.47.0",
     "pdf-lib": "^1.17.1",
     "react": "^19.0.0",

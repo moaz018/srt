@@ -25,7 +25,11 @@ import {
   FileCode,
   ShieldCheck,
   Download,
-  GitBranch
+  GitBranch,
+  Cloud,
+  Database,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 import {
   CatalogDesign,
@@ -42,12 +46,23 @@ import {
   saveSiteConfig,
   resetSiteConfig
 } from '../data/siteConfig';
+import {
+  isFirebaseConfigured,
+  getFirebaseConfig,
+  saveFirebaseConfig,
+  pushSiteConfigToCloud,
+  pushDesignToCloud,
+  deleteDesignFromCloud,
+  syncAllDesignsToCloud,
+  FirebaseConfig,
+  reinitFirebase
+} from '../services/firebase';
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState('');
-  const [activeTab, setActiveTab] = useState<'catalog' | 'site' | 'github'>('catalog');
+  const [activeTab, setActiveTab] = useState<'catalog' | 'site' | 'cloud' | 'github'>('catalog');
 
   // State
   const [designs, setDesigns] = useState<CatalogDesign[]>([]);
@@ -85,6 +100,12 @@ export default function Admin() {
     type: 'idle',
     message: ''
   });
+
+  // Firebase Cloud State
+  const [firebaseCfg, setFirebaseCfg] = useState<FirebaseConfig>(getFirebaseConfig());
+  const [firebaseRawInput, setFirebaseRawInput] = useState('');
+  const [firebaseMsg, setFirebaseMsg] = useState('');
+  const [isSyncingAllCloud, setIsSyncingAllCloud] = useState(false);
 
   // Check login state on mount
   useEffect(() => {
@@ -253,8 +274,14 @@ export default function Admin() {
 
     if (editingDesign) {
       updateCatalogDesign(designObject);
+      if (isFirebaseConfigured()) {
+        pushDesignToCloud(designObject).catch(err => console.warn('Cloud sync design warning:', err));
+      }
     } else {
       addCatalogDesign(designObject);
+      if (isFirebaseConfigured()) {
+        pushDesignToCloud(designObject).catch(err => console.warn('Cloud sync design warning:', err));
+      }
     }
 
     setIsModalOpen(false);
@@ -264,16 +291,29 @@ export default function Admin() {
   const handleDeleteDesign = (id: string) => {
     if (window.confirm(`Are you sure you want to delete design code "${id}" from the catalogue?`)) {
       deleteCatalogDesign(id);
+      if (isFirebaseConfigured()) {
+        deleteDesignFromCloud(id).catch(err => console.warn('Cloud delete design warning:', err));
+      }
     }
   };
 
   // Save Site Settings Handler
-  const handleSaveSiteConfig = (e: React.FormEvent) => {
+  const handleSaveSiteConfig = async (e: React.FormEvent) => {
     e.preventDefault();
     const updated = saveSiteConfig(siteForm);
     setSiteConfigState(updated);
-    setSiteSuccessMsg('Site settings updated! Numbers and content are now active across all pages.');
-    setTimeout(() => setSiteSuccessMsg(''), 4000);
+
+    if (isFirebaseConfigured()) {
+      try {
+        await pushSiteConfigToCloud(updated);
+        setSiteSuccessMsg('⚡ Updated! Changes synced in real time to all mobile phones & PCs worldwide.');
+      } catch (err: any) {
+        setSiteSuccessMsg(`Saved locally. (Cloud sync error: ${err.message})`);
+      }
+    } else {
+      setSiteSuccessMsg('Site settings updated locally! Connect Firebase in the Cloud tab to sync to mobile devices.');
+    }
+    setTimeout(() => setSiteSuccessMsg(''), 5000);
   };
 
   // Deploy to GitHub API
@@ -378,6 +418,78 @@ export default function Admin() {
       });
     } finally {
       setIsSyncing(false);
+    }
+  };
+
+  // Parse and save Firebase configuration
+  const handleSaveFirebaseConfig = (e: React.FormEvent) => {
+    e.preventDefault();
+    let parsedConfig: FirebaseConfig = { ...firebaseCfg };
+
+    if (firebaseRawInput.trim()) {
+      try {
+        const text = firebaseRawInput.trim();
+        const extractField = (key: string) => {
+          const regex = new RegExp(`['"]?${key}['"]?\\s*:\\s*['"]([^'"]+)['"]`, 'i');
+          const match = text.match(regex);
+          return match ? match[1] : '';
+        };
+
+        const apiKey = extractField('apiKey');
+        const authDomain = extractField('authDomain');
+        const projectId = extractField('projectId');
+        const storageBucket = extractField('storageBucket');
+        const messagingSenderId = extractField('messagingSenderId');
+        const appId = extractField('appId');
+
+        if (apiKey && projectId) {
+          parsedConfig = {
+            apiKey,
+            authDomain: authDomain || `${projectId}.firebaseapp.com`,
+            projectId,
+            storageBucket: storageBucket || `${projectId}.appspot.com`,
+            messagingSenderId: messagingSenderId || '',
+            appId: appId || ''
+          };
+        } else {
+          const json = JSON.parse(text);
+          if (json.apiKey && json.projectId) {
+            parsedConfig = json;
+          }
+        }
+      } catch (err: any) {
+        setFirebaseMsg('Could not parse config. Please check formatting or fill fields individually.');
+        return;
+      }
+    }
+
+    if (!parsedConfig.apiKey || !parsedConfig.projectId) {
+      setFirebaseMsg('Please provide at least an apiKey and projectId.');
+      return;
+    }
+
+    saveFirebaseConfig(parsedConfig);
+    setFirebaseCfg(parsedConfig);
+    reinitFirebase();
+    setFirebaseMsg('✅ Firebase connected! Real-time synchronization is now ACTIVE across all mobile phones & PCs.');
+    setTimeout(() => setFirebaseMsg(''), 6000);
+  };
+
+  // Bulk sync all current designs and site config to Firestore
+  const handleSyncAllToFirebase = async () => {
+    if (!isFirebaseConfigured()) {
+      alert('Please connect Firebase Firestore first.');
+      return;
+    }
+    setIsSyncingAllCloud(true);
+    try {
+      await pushSiteConfigToCloud(getSiteConfig());
+      const count = await syncAllDesignsToCloud(designs);
+      alert(`Success! Real-time Cloud Synced: ${count} designs and all site settings to Firebase Firestore.`);
+    } catch (err: any) {
+      alert(`Cloud sync error: ${err.message}`);
+    } finally {
+      setIsSyncingAllCloud(false);
     }
   };
 
@@ -532,6 +644,23 @@ export default function Admin() {
             >
               <Building className="w-4 h-4" />
               <span>Contact & Site Content</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('cloud')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
+                activeTab === 'cloud'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              }`}
+            >
+              <Cloud className="w-4 h-4" />
+              <span>Real-Time Cloud (Firebase)</span>
+              {isFirebaseConfigured() ? (
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              ) : (
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
+              )}
             </button>
 
             <button
@@ -878,7 +1007,150 @@ export default function Admin() {
         )}
 
         {/* ========================================================= */}
-        {/* TAB 3: GITHUB CLOUD DEPLOY & SYNC */}
+        {/* TAB 3: REAL-TIME CLOUD SYNC (FIREBASE) */}
+        {/* ========================================================= */}
+        {activeTab === 'cloud' && (
+          <div className="max-w-3xl mx-auto space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <Cloud className="w-5 h-5 text-primary" />
+                <span>Real-Time Cloud Database (Firebase Firestore)</span>
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Enable instant real-time synchronization. When connected, changes saved on your laptop appear in ~200ms on all mobile phones and customer devices worldwide.
+              </p>
+            </div>
+
+            {/* Status Card */}
+            <div className={`p-6 rounded-3xl border shadow-sm transition-all ${
+              isFirebaseConfigured()
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-950 dark:text-emerald-100'
+                : 'bg-amber-500/10 border-amber-500/30 text-amber-950 dark:text-amber-100'
+            }`}>
+              <div className="flex items-start gap-4">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${
+                  isFirebaseConfigured() ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'
+                }`}>
+                  {isFirebaseConfigured() ? <Wifi className="w-6 h-6" /> : <WifiOff className="w-6 h-6" />}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-sm flex items-center gap-2">
+                      <span>{isFirebaseConfigured() ? 'Cloud Real-Time Sync is ACTIVE' : 'Local Fallback Mode (Cloud Not Connected)'}</span>
+                      {isFirebaseConfigured() && (
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold">
+                          Online
+                        </span>
+                      )}
+                    </h3>
+                  </div>
+                  <p className="text-xs mt-1 leading-relaxed opacity-90">
+                    {isFirebaseConfigured()
+                      ? `Connected to Firestore Project: "${firebaseCfg.projectId}". Any edit you make in this admin panel broadcasts in ~200ms to all mobile phones and desktop visitors without refreshing.`
+                      : 'Changes are currently saved only to this laptop browser. To update mobile devices in real time, paste your free Google Firebase config below.'}
+                  </p>
+                </div>
+              </div>
+
+              {isFirebaseConfigured() && (
+                <div className="mt-5 pt-4 border-t border-emerald-500/20 flex flex-wrap items-center justify-between gap-3">
+                  <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-200">
+                    {designs.length} designs available to sync
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleSyncAllToFirebase}
+                    disabled={isSyncingAllCloud}
+                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow transition-all disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isSyncingAllCloud ? 'animate-spin' : ''}`} />
+                    <span>{isSyncingAllCloud ? 'Syncing to Cloud...' : 'Upload All Designs & Settings to Cloud'}</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Quick 3-Step Setup Guide */}
+            <div className="bg-card p-6 sm:p-8 rounded-3xl border border-border shadow-md space-y-6">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-primary flex items-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                <span>How to Get Free Firebase in 2 Minutes:</span>
+              </h3>
+
+              <div className="space-y-3 text-xs text-muted-foreground leading-relaxed">
+                <div className="flex gap-3">
+                  <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold flex-shrink-0">1</span>
+                  <p>
+                    Open <a href="https://console.firebase.google.com" target="_blank" rel="noopener noreferrer" className="font-bold text-primary hover:underline">Firebase Console</a> with your Google account and click <strong>Create a project</strong> (name it e.g. <code>srt-sublimation</code>).
+                  </p>
+                </div>
+                <div className="flex gap-3">
+                  <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold flex-shrink-0">2</span>
+                  <p>
+                    In the left sidebar, click <strong>Build &rarr; Firestore Database</strong>, click <strong>Create Database</strong>, choose <strong>Start in test mode</strong> and click Create.
+                  </p>
+                </div>
+                <div className="flex gap-3">
+                  <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold flex-shrink-0">3</span>
+                  <p>
+                    Click the ⚙️ Gear icon (Project Settings), scroll down to <strong>Your apps</strong>, click the <strong>Web (&lt;/&gt;)</strong> icon, copy the <code>firebaseConfig</code> code, and paste it into the box below!
+                  </p>
+                </div>
+              </div>
+
+              {/* Paste Config Form */}
+              <form onSubmit={handleSaveFirebaseConfig} className="space-y-4 pt-4 border-t border-border">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                    Paste Firebase Configuration (JSON or JavaScript)
+                  </label>
+                  <textarea
+                    rows={6}
+                    value={firebaseRawInput}
+                    onChange={e => setFirebaseRawInput(e.target.value)}
+                    placeholder={`Paste here, for example:\nconst firebaseConfig = {\n  apiKey: "AIzaSy...",\n  authDomain: "srt-app.firebaseapp.com",\n  projectId: "srt-app",\n  storageBucket: "srt-app.appspot.com",\n  messagingSenderId: "...",\n  appId: "..."\n};`}
+                    className="w-full px-4 py-3 rounded-xl bg-background border border-border text-foreground font-mono text-xs focus:outline-none focus:border-primary"
+                  />
+                </div>
+
+                {firebaseMsg && (
+                  <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 text-primary text-xs font-medium flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                    <span>{firebaseMsg}</span>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm('Clear cloud credentials and return to local fallback mode?')) {
+                        localStorage.removeItem('srt_firebase_config');
+                        setFirebaseCfg({ apiKey: '', authDomain: '', projectId: '', storageBucket: '', messagingSenderId: '', appId: '' });
+                        setFirebaseRawInput('');
+                        reinitFirebase();
+                      }
+                    }}
+                    className="text-xs text-muted-foreground hover:text-destructive transition-colors"
+                  >
+                    Disconnect Cloud
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-xs flex items-center gap-2 shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all"
+                  >
+                    <Cloud className="w-4 h-4" />
+                    <span>Save & Connect Firebase</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* TAB 4: GITHUB CLOUD DEPLOY & SYNC */}
         {/* ========================================================= */}
         {activeTab === 'github' && (
           <div className="max-w-3xl mx-auto">

@@ -118,15 +118,13 @@ const designs = [
   },
 ];
 
-// Copy each actual design file into public/catalog/
+// Copy each actual design file into public/catalog/ if not already present
 designs.forEach(d => {
   const s = path.join(srcDir, d.src);
   const t = path.join(publicCatalogDir, d.dest);
-  if (fs.existsSync(s)) {
+  if (!fs.existsSync(t) && fs.existsSync(s)) {
     fs.copyFileSync(s, t);
     console.log(`Copied ${d.src} -> ${d.dest}`);
-  } else {
-    console.warn(`Source not found: ${s}`);
   }
 });
 

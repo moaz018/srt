@@ -39,10 +39,14 @@ jobs:
         env:
           BASE_PATH: /srt/
 
-      - name: Prepare SPA redirects and .nojekyll
+      - name: Prepare SPA redirects, docs folder, and .nojekyll
         run: |
           cp dist/index.html dist/404.html || true
           touch dist/.nojekyll
+          touch .nojekyll
+          rm -rf docs
+          cp -r dist docs
+          touch docs/.nojekyll
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

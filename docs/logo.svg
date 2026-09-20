@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <!-- Radiant Metallic Gold Gradient -->
+    <linearGradient id="goldGradLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff0a8" />
+      <stop offset="25%" stop-color="#e8c258" />
+      <stop offset="50%" stop-color="#fdf2b5" />
+      <stop offset="75%" stop-color="#c69522" />
+      <stop offset="100%" stop-color="#936d13" />
+    </linearGradient>
+
+    <!-- Deep Metallic Gold Shadow Gradient -->
+    <linearGradient id="goldGradDark" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7a5408" />
+      <stop offset="40%" stop-color="#b88b20" />
+      <stop offset="70%" stop-color="#e2bc52" />
+      <stop offset="100%" stop-color="#916710" />
+    </linearGradient>
+
+    <!-- Rich Emerald Shadow Overlay for 3D Interlace -->
+    <linearGradient id="royalShadow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a2638" />
+      <stop offset="100%" stop-color="#051c14" />
+    </linearGradient>
+
+    <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- INTERTWINED S-R-T MONOGRAM EMBLEM -->
+  <g transform="translate(0, -10)">
+    <!-- Central T Vertical Stem & Top Arch -->
+    <path
+      d="M236 40 C236 40 250 35 264 40 C278 45 284 55 284 75 L284 260 C284 275 272 290 250 290 C228 290 216 275 216 260 L216 75 C216 55 222 45 236 40 Z"
+      fill="url(#goldGradLight)"
+      filter="url(#goldGlow)"
+    />
+
+    <!-- S Top Loop & Sweeping Body (Left and Right Overlap) -->
+    <path
+      d="M216 110 C180 110 152 135 152 172 C152 215 190 235 230 255 C275 278 305 305 305 345 C305 395 260 425 210 425 C165 425 140 395 138 360 L168 355 C170 375 185 395 210 395 C242 395 272 375 272 345 C272 315 245 295 205 275 C162 252 120 225 120 175 C120 125 160 85 216 85 C242 85 268 95 284 110 L266 132 C252 120 235 110 216 110 Z"
+      fill="url(#goldGradDark)"
+    />
+
+    <!-- Interlacing Outer Ribbons creating the Signature Celtic Knot -->
+    <!-- Left Loop Curve -->
+    <path
+      d="M178 135 C145 160 145 215 178 245 C200 265 228 285 255 305 C275 320 288 340 288 365 C288 395 260 415 225 415 C190 415 168 390 162 360 L135 365 C142 410 178 442 225 442 C278 442 318 410 318 362 C318 325 298 300 270 280 C245 262 218 242 198 222 C175 200 175 168 198 148 C212 135 230 128 250 128 L250 100 C220 100 195 112 178 135 Z"
+      fill="url(#goldGradLight)"
+    />
+
+    <!-- Right R Loop & Sweeping Serif Leg -->
+    <path
+      d="M260 70 C310 70 355 105 355 155 C355 195 325 225 285 238 C318 260 348 305 365 358 C375 390 395 405 415 405 L415 432 C380 432 352 410 338 375 C322 328 295 285 260 268 L260 238 C298 230 325 202 325 160 C325 125 295 98 260 98 Z"
+      fill="url(#goldGradDark)"
+    />
+
+    <!-- R Sweeping Accent Swash Leg (Bottom Right Tail) -->
+    <path
+      d="M338 375 C352 410 380 432 415 432 C395 432 375 410 365 375 C348 322 318 277 285 255 L298 232 C335 255 370 305 390 365 C402 400 412 415 422 415 L422 425 C402 425 385 412 375 382 Z"
+      fill="url(#goldGradLight)"
+    />
+
+    <!-- Deep 3D Contrast Shadow Segment (Lower Left) -->
+    <path
+      d="M178 245 C155 220 152 180 168 152 C160 162 155 178 155 195 C155 230 185 262 215 285 L228 268 C208 252 190 235 178 245 Z"
+      fill="url(#royalShadow)"
+      opacity="0.85"
+    />
+    
+    <!-- Top Central Crest Finial -->
+    <polygon points="250,22 260,38 250,34 240,38" fill="url(#goldGradLight)" />
+  </g>
+
+  <!-- TYPOGRAPHY: SRT WITH ELEGANT SERIFS -->
+  <g transform="translate(250, 415)" text-anchor="middle">
+    <!-- Left Flanking Ornate Line -->
+    <path d="M-230 -12 L-100 -12 M-230 -12 L-160 -15 M-100 -12 L-110 -18 L-100 -12 L-110 -6 Z" stroke="url(#goldGradLight)" stroke-width="2.5" fill="url(#goldGradLight)" />
+    
+    <!-- SRT Text -->
+    <text
+      x="0"
+      y="12"
+      font-family="'Playfair Display', 'Cinzel', 'Georgia', serif"
+      font-size="64"
+      font-weight="900"
+      letter-spacing="14"
+      fill="url(#goldGradLight)"
+    >SRT</text>
+
+    <!-- Right Flanking Ornate Line -->
+    <path d="M100 -12 L230 -12 M230 -12 L160 -15 M100 -12 L110 -18 L100 -12 L110 -6 Z" stroke="url(#goldGradLight)" stroke-width="2.5" fill="url(#goldGradLight)" />
+  </g>
+
+  <!-- LOWER ORNAMENTAL FLEUR-DE-LIS / DIAMOND EMBLEM -->
+  <g transform="translate(250, 465)">
+    <!-- Horizontal Rules -->
+    <line x1="-160" y1="0" x2="-45" y2="0" stroke="url(#goldGradLight)" stroke-width="2" />
+    <line x1="45" y1="0" x2="160" y2="0" stroke="url(#goldGradLight)" stroke-width="2" />
+
+    <!-- Center Diamond Crest -->
+    <polygon points="0,-18 14,0 0,18 -14,0" fill="url(#goldGradLight)" />
+    <polygon points="0,-10 8,0 0,10 -8,0" fill="#042116" />
+
+    <!-- Side Flourishes -->
+    <path d="M-18 -8 C-30 -20 -42 0 -22 8 C-35 15 -18 2 0 0" fill="none" stroke="url(#goldGradLight)" stroke-width="2" />
+    <path d="M18 -8 C30 -20 42 0 22 8 C35 15 18 2 0 0" fill="none" stroke="url(#goldGradLight)" stroke-width="2" />
+    <circle cx="-38" cy="0" r="3" fill="url(#goldGradLight)" />
+    <circle cx="38" cy="0" r="3" fill="url(#goldGradLight)" />
+  </g>
+</svg>

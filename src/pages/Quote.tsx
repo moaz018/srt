@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CheckCircle2, Upload, Sparkles, Send, FileText, MessageCircle } from 'lucide-react';
 import AnimatedSection from '../components/AnimatedSection';
+import { getSiteConfig } from '../data/siteConfig';
 
 const serviceOptions = [
   'Polyester Sublimation Printing',
@@ -24,6 +25,17 @@ const steps = [
 export default function Quote() {
   const [submitted, setSubmitted] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [siteConfig, setSiteConfig] = useState(getSiteConfig());
+
+  useEffect(() => {
+    const handleConfigChange = () => setSiteConfig(getSiteConfig());
+    window.addEventListener('srt_config_updated', handleConfigChange);
+    return () => window.removeEventListener('srt_config_updated', handleConfigChange);
+  }, []);
+
+  const whatsappPhone = siteConfig.whatsappNumber || '923236602316';
+  const whatsappDisplay = siteConfig.whatsappDisplay || '03236602316';
+
   const [form, setForm] = useState({
     name: '',
     company: '',
@@ -237,13 +249,13 @@ export default function Quote() {
                   {/* Direct WhatsApp Option */}
                   <div className="pt-2">
                     <a
-                      href="https://wa.me/923236602316?text=Hello%20SRT%20Sublimation%2C%20I%20want%20an%20instant%20production%20quote%20for%20my%20order."
+                      href={`https://wa.me/${whatsappPhone}?text=Hello%20SRT%20Sublimation%2C%20I%20want%20an%20instant%20production%20quote%20for%20my%20order.`}
                       target="_blank"
                       rel="noreferrer"
                       className="w-full flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-2xl bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all active:scale-95"
                     >
                       <MessageCircle className="w-4 h-4 fill-white" />
-                      <span>Instant WhatsApp Quote (03236602316)</span>
+                      <span>Instant WhatsApp Quote ({whatsappDisplay})</span>
                     </a>
                   </div>
                 </div>

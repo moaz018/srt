@@ -269,8 +269,9 @@ export default function Admin() {
   // Save Site Settings Handler
   const handleSaveSiteConfig = (e: React.FormEvent) => {
     e.preventDefault();
-    saveSiteConfig(siteForm);
-    setSiteSuccessMsg('Site settings updated successfully! Changes are live in your browser.');
+    const updated = saveSiteConfig(siteForm);
+    setSiteConfigState(updated);
+    setSiteSuccessMsg('Site settings updated! Numbers and content are now active across all pages.');
     setTimeout(() => setSiteSuccessMsg(''), 4000);
   };
 
@@ -290,16 +291,14 @@ export default function Admin() {
       const repo = siteConfig.githubRepo || 'moaz018/srt';
       const branch = siteConfig.githubBranch || 'main';
 
-      // Prepare updated catalog JSON file
+      // 1. Commit updated catalog JSON file
       const currentDesigns = getCatalogDesigns();
       const catalogContent = JSON.stringify(currentDesigns, null, 2);
       const encodedContent = btoa(unescape(encodeURIComponent(catalogContent)));
 
-      // Check if catalog.json exists on GitHub to get its SHA
-      const getFileUrl = `https://api.github.com/repos/${repo}/contents/src/data/catalog.json?ref=${branch}`;
       let sha = '';
       try {
-        const checkRes = await fetch(getFileUrl, {
+        const checkRes = await fetch(`https://api.github.com/repos/${repo}/contents/src/data/catalog.json?ref=${branch}`, {
           headers: {
             Authorization: `Bearer ${githubToken.trim()}`,
             Accept: 'application/vnd.github+json'
@@ -309,13 +308,9 @@ export default function Admin() {
           const fileData = await checkRes.json();
           sha = fileData.sha;
         }
-      } catch (err) {
-        // file doesn't exist yet, ok to create
-      }
+      } catch (err) {}
 
-      // Commit to GitHub via PUT /contents/
-      const putFileUrl = `https://api.github.com/repos/${repo}/contents/src/data/catalog.json`;
-      const commitRes = await fetch(putFileUrl, {
+      const commitRes = await fetch(`https://api.github.com/repos/${repo}/contents/src/data/catalog.json`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${githubToken.trim()}`,
@@ -332,12 +327,48 @@ export default function Admin() {
 
       if (!commitRes.ok) {
         const errJson = await commitRes.json();
-        throw new Error(errJson.message || 'Failed to commit to GitHub.');
+        throw new Error(errJson.message || 'Failed to commit catalog to GitHub.');
       }
+
+      // 2. Commit updated siteConfig JSON file
+      const currentConfig = getSiteConfig();
+      const configToSave = { ...currentConfig };
+      delete (configToSave as any).githubToken;
+      const configContent = JSON.stringify(configToSave, null, 2);
+      const encodedConfig = btoa(unescape(encodeURIComponent(configContent)));
+
+      let configSha = '';
+      try {
+        const configCheckRes = await fetch(`https://api.github.com/repos/${repo}/contents/src/data/siteConfig.json?ref=${branch}`, {
+          headers: {
+            Authorization: `Bearer ${githubToken.trim()}`,
+            Accept: 'application/vnd.github+json'
+          }
+        });
+        if (configCheckRes.ok) {
+          const configData = await configCheckRes.json();
+          configSha = configData.sha;
+        }
+      } catch (err) {}
+
+      await fetch(`https://api.github.com/repos/${repo}/contents/src/data/siteConfig.json`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${githubToken.trim()}`,
+          Accept: 'application/vnd.github+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: `Admin Panel Update: Site settings & WhatsApp updated`,
+          content: encodedConfig,
+          branch: branch,
+          ...(configSha ? { sha: configSha } : {})
+        })
+      });
 
       setSyncStatus({
         type: 'success',
-        message: 'Successfully committed to GitHub repository! GitHub Actions is now automatically deploying your live site.'
+        message: 'Successfully committed site settings & catalogue to GitHub! GitHub Actions is deploying the update live.'
       });
     } catch (err: any) {
       setSyncStatus({

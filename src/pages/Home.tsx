@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
@@ -23,6 +24,7 @@ import FabricGuide from '../components/FabricGuide';
 import FactoryInfrastructure from '../components/FactoryInfrastructure';
 import { services } from '../data/services';
 import { products } from '../data/products';
+import { getSiteConfig } from '../data/siteConfig';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Layers,
@@ -99,6 +101,17 @@ const industries = [
 ];
 
 export default function Home() {
+  const [siteConfig, setSiteConfig] = useState(getSiteConfig());
+
+  useEffect(() => {
+    const handleConfigChange = () => setSiteConfig(getSiteConfig());
+    window.addEventListener('srt_config_updated', handleConfigChange);
+    return () => window.removeEventListener('srt_config_updated', handleConfigChange);
+  }, []);
+
+  const whatsappPhone = siteConfig.whatsappNumber || '923236602316';
+  const whatsappDisplay = siteConfig.whatsappDisplay || '03236602316';
+
   return (
     <main className="overflow-hidden">
       {/* Hero */}
@@ -182,13 +195,13 @@ export default function Home() {
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
               </Link>
               <a
-                href="https://wa.me/923236602316?text=Hello%20SRT%20Sublimation%2C%20I%20would%20like%20to%20inquire%20about%20printing%20services%20and%20rates."
+                href={`https://wa.me/${whatsappPhone}?text=Hello%20SRT%20Sublimation%2C%20I%20would%20like%20to%20inquire%20about%20printing%20services%20and%20rates.`}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center justify-center gap-2 px-7 py-4 bg-[#25D366] text-white rounded-xl font-bold hover:bg-[#20ba59] hover:shadow-xl hover:shadow-emerald-600/30 hover:scale-[1.03] active:scale-95 transition-all text-sm group shadow-md"
               >
                 <MessageCircle className="w-4 h-4 fill-white" />
-                <span>WhatsApp: 03236602316</span>
+                <span>WhatsApp: {whatsappDisplay}</span>
               </a>
               <Link
                 to="/quote"

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Printer,
@@ -17,6 +17,7 @@ import {
   RotateCw,
 } from 'lucide-react';
 import AnimatedSection from './AnimatedSection';
+import { getSiteConfig } from '../data/siteConfig';
 
 const machines = [
   {
@@ -102,6 +103,15 @@ const teams = [
 
 export default function FactoryInfrastructure() {
   const [activeMachineIndex, setActiveMachineIndex] = useState(0);
+  const [siteConfig, setSiteConfig] = useState(getSiteConfig());
+
+  useEffect(() => {
+    const handleConfigChange = () => setSiteConfig(getSiteConfig());
+    window.addEventListener('srt_config_updated', handleConfigChange);
+    return () => window.removeEventListener('srt_config_updated', handleConfigChange);
+  }, []);
+
+  const whatsappPhone = siteConfig.whatsappNumber || '923236602316';
   const activeMachine = machines[activeMachineIndex];
 
   return (
@@ -315,7 +325,7 @@ export default function FactoryInfrastructure() {
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <a
-                  href="https://wa.me/923236602316?text=Hello%20SRT%20Sublimation%2C%20I%20am%20interested%20in%20the%20upcoming%203.2m%20bedsheet%20and%20home%20textiles%20roll-to-roll%20machinery."
+                  href={`https://wa.me/${whatsappPhone}?text=Hello%20SRT%20Sublimation%2C%20I%20am%20interested%20in%20the%20upcoming%203.2m%20bedsheet%20and%20home%20textiles%20roll-to-roll%20machinery.`}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center justify-center gap-2 px-7 py-4 bg-[#25D366] text-white rounded-xl font-semibold hover:bg-[#20ba59] active:scale-95 transition-all text-sm border border-white/15 text-center shadow-md"

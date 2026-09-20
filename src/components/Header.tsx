@@ -56,7 +56,7 @@ export default function Header() {
           <Link to="/" className="flex items-center gap-3 group select-none">
             <div className="h-11 w-11 rounded-xl bg-[var(--navy)] p-1 border border-primary/40 flex items-center justify-center shadow-md group-hover:scale-105 group-hover:border-primary transition-all duration-300">
               <img
-                src="/logo.svg"
+                src={`${import.meta.env.BASE_URL}logo.svg`}
                 alt="SRT Sublimation Printing Sialkot Logo"
                 className="h-full w-full object-contain"
               />

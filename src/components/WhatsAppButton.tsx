@@ -32,7 +32,7 @@ export default function WhatsAppButton() {
             <div className="flex items-center gap-3">
               <div className="relative">
                 <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-bold text-white border border-white/30">
-                  <img src="/logo.svg" alt="SRT Logo" className="w-6 h-6 object-contain" />
+                  <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="SRT Logo" className="w-6 h-6 object-contain" />
                 </div>
                 <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-[#075E54] rounded-full" />
               </div>

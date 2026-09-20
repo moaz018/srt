@@ -21,7 +21,7 @@ export default function Footer() {
             <Link to="/" className="flex items-center gap-3 mb-4 group">
               <div className="h-12 w-12 rounded-xl bg-black/40 p-1.5 border border-primary/40 flex items-center justify-center shadow-lg group-hover:border-primary transition-all">
                 <img
-                  src="/logo.svg"
+                  src={`${import.meta.env.BASE_URL}logo.svg`}
                   alt="SRT Sublimation Printing Sialkot Logo"
                   className="h-full w-full object-contain"
                 />

@@ -318,7 +318,7 @@ export default function Catalog() {
                   <div className="absolute -inset-1 bg-gradient-to-r from-primary to-amber-500 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-500" />
                   <div className="relative rounded-2xl overflow-hidden border border-border bg-neutral-900 shadow-2xl">
                     <img
-                      src="/catalog/design-srt-3dr-001.jpg"
+                      src={CATALOG_DESIGNS[0].image}
                       alt="3D Royal Collection Sample Book Cover Preview"
                       className="w-full h-auto aspect-4/3 object-cover transform group-hover:scale-105 transition-transform duration-500"
                     />

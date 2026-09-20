@@ -1,8 +1,9 @@
 {
-  "apiKey": "",
-  "authDomain": "",
-  "projectId": "",
-  "storageBucket": "",
-  "messagingSenderId": "",
-  "appId": ""
+  "apiKey": "AIzaSyCeEDmQKlwGFWU6szXMM_XJ24yYSEPSkCo",
+  "authDomain": "srt-sublimation.firebaseapp.com",
+  "projectId": "srt-sublimation",
+  "storageBucket": "srt-sublimation.firebasestorage.app",
+  "messagingSenderId": "490275781057",
+  "appId": "1:490275781057:web:40eab697bf40da38f1d740",
+  "measurementId": "G-Y1JY2HWE5T"
 }

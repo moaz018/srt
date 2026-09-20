@@ -28,7 +28,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   businessHours: rawConfigJson.businessHours || 'Mon - Sat: 8:30 AM - 7:30 PM (PKT)',
   heroHeadline: rawConfigJson.heroHeadline || 'Export-Grade Sublimation Printing & Apparel Manufacturing',
   heroSubheadline: rawConfigJson.heroSubheadline || 'Precision molecular dye sublimation on polyester performance fabrics. Powered by dedicated prepress designers, industrial plotters, and rotary heat calender engineers in Sialkot, Pakistan.',
-  adminPin: rawConfigJson.adminPin || 'srt2026',
+  adminPin: rawConfigJson.adminPin || '6504',
   githubRepo: rawConfigJson.githubRepo || 'moaz018/srt',
   githubBranch: rawConfigJson.githubBranch || 'main',
 };

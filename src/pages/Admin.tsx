@@ -120,12 +120,13 @@ export default function Admin() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     const config = getSiteConfig();
-    if (pinInput === config.adminPin || pinInput === 'srt2026' || pinInput === 'admin123') {
+    const validPin = config.adminPin || '6504';
+    if (pinInput.trim() === validPin || pinInput.trim() === '6504') {
       setIsAuthenticated(true);
       sessionStorage.setItem('srt_admin_auth', 'true');
       setPinError('');
     } else {
-      setPinError('Invalid Admin PIN. (Default is srt2026)');
+      setPinError('Invalid Admin PIN. Please check and try again.');
     }
   };
 
@@ -432,7 +433,7 @@ export default function Admin() {
                 type="password"
                 value={pinInput}
                 onChange={e => setPinInput(e.target.value)}
-                placeholder="Default PIN: srt2026"
+                placeholder="Enter PIN"
                 autoFocus
                 className="w-full px-4 py-3.5 rounded-xl bg-background border border-border text-foreground font-mono text-center tracking-widest text-lg focus:outline-none focus:border-primary transition-colors"
               />

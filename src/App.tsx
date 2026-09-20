@@ -15,6 +15,7 @@ import Industries from './pages/Industries';
 import Quote from './pages/Quote';
 import Contact from './pages/Contact';
 import FAQ from './pages/FAQ';
+import Catalog from './pages/Catalog';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -35,6 +36,8 @@ function Layout() {
           <Route path="/services/:slug" element={<ServiceDetail />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products/:slug" element={<ProductDetail />} />
+          <Route path="/catalog" element={<Catalog />} />
+          <Route path="/sample-book" element={<Catalog />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/industries" element={<Industries />} />
           <Route path="/quote" element={<Quote />} />

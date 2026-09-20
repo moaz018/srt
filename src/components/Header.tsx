@@ -18,6 +18,7 @@ const navLinks = [
   { label: 'About', to: '/about' },
   { label: 'Services', to: '/services', dropdown: true },
   { label: 'Products', to: '/products' },
+  { label: 'Sample Book', to: '/catalog', badge: 'PDF' },
   { label: 'Portfolio', to: '/portfolio' },
   { label: 'Industries', to: '/industries' },
   { label: 'Contact', to: '/contact' },
@@ -134,7 +135,12 @@ export default function Header() {
                     `${baseLinkClass} ${isActive ? activeLinkClass : inactiveLinkClass}`
                   }
                 >
-                  {link.label}
+                  <span>{link.label}</span>
+                  {link.badge && (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold border border-amber-500/30">
+                      {link.badge}
+                    </span>
+                  )}
                 </NavLink>
               )
             )}
@@ -198,14 +204,19 @@ export default function Header() {
                 end={link.to === '/'}
                 onClick={() => setMobileOpen(false)}
                 className={({ isActive }) =>
-                  `block px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                  `flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                     isActive
                       ? 'text-primary bg-primary/10'
                       : 'text-foreground/80 hover:text-foreground hover:bg-muted'
                   }`
                 }
               >
-                {link.label}
+                <span>{link.label}</span>
+                {link.badge && (
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold border border-amber-500/30">
+                    {link.badge}
+                  </span>
+                )}
               </NavLink>
               {link.dropdown && (
                 <div className="ml-3 pl-3 border-l-2 border-border/80 my-1 space-y-1">

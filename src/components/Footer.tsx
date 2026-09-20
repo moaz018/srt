@@ -74,6 +74,7 @@ export default function Footer() {
                 { label: 'About Factory & Team', to: '/about' },
                 { label: 'Printing Services', to: '/services' },
                 { label: 'Product Catalog', to: '/products' },
+                { label: 'Sample Book & PDF', to: '/catalog' },
                 { label: 'Client Portfolio', to: '/portfolio' },
                 { label: 'Industries We Serve', to: '/industries' },
                 { label: 'Request a Quote', to: '/quote' },

@@ -8,6 +8,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: "pages"
@@ -15,6 +17,9 @@ concurrency:
 
 jobs:
   build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -34,14 +39,24 @@ jobs:
         env:
           BASE_PATH: /srt/
 
-      - name: Copy 404 for Single Page App routing
-        run: cp dist/index.html dist/404.html
+      - name: Prepare SPA redirects and .nojekyll
+        run: |
+          cp dist/index.html dist/404.html || true
+          touch dist/.nojekyll
 
-      - name: Ensure .nojekyll exists
-        run: touch dist/.nojekyll
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
 
-      - name: Deploy to gh-pages branch
+      - name: Deploy to GitHub Pages (Actions Mode)
+        id: deployment
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - name: Deploy to gh-pages branch (Branch Mode Fallback)
         uses: peaceiris/actions-gh-pages@v4
+        if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist

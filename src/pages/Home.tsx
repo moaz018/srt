@@ -174,10 +174,11 @@ export default function Home() {
 
             <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-14 animate-fade-up [animation-delay:350ms]">
               <Link
-                to="/quote"
+                to="/catalog"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.03] active:scale-95 transition-all text-sm group"
               >
-                <span>Request a Factory Quote</span>
+                <Sparkles className="w-4 h-4 text-amber-300" />
+                <span>Sample Book & PDF Catalogue</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
               </Link>
               <a
@@ -190,10 +191,10 @@ export default function Home() {
                 <span>WhatsApp: 03236602316</span>
               </a>
               <Link
-                to="/services"
+                to="/quote"
                 className="inline-flex items-center justify-center gap-2 px-6 py-4 bg-white/10 text-white rounded-xl font-semibold hover:bg-white/20 hover:scale-[1.02] active:scale-95 transition-all text-sm border border-white/15 backdrop-blur-sm"
               >
-                Machinery & Services
+                Request a Quote
               </Link>
             </div>
 
